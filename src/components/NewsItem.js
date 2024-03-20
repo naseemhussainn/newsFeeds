@@ -1,26 +1,37 @@
 import React from 'react'
 import { useState, useEffect } from "react";
 import newsImage from '../files/noNews.jpg';
-import apiKey from '../files/Apikey';
 import Loader from './Loader';
+import InfiniteScroll from "react-infinite-scroll-component";
+
 function NewsItem(props) {
     const[news,setNews] = useState([]);
-    const[page,setPage] = useState(1);
-    const[pageCount,setPageCount] = useState(1);
+    const[page,setPage] = useState(props.pageSet);
+    const[pageCount,setPageCount] = useState(0);
     const[loader,SetLoader] = useState(true);
+    const fetchMoreData = () => {
+        setPage(prevState => prevState + 1);
+    };
     const fetchNews = async() =>{
             try{
-                SetLoader(true);
-                const response = await fetch(`https://newsapi.org/v2/${props.Mainquery}?apiKey=${apiKey}&country=in${props.search ? `&category=${props.search}`: ''}&page=${page}`);
+                props.progress(10)
+                const response = await fetch(`https://newsapi.org/v2/${props.Mainquery}?apiKey=${props.Apikey}&pageSize=10&country=in${props.search ? `&category=${props.search}`: ''}&page=${page}`);
+                props.progress(30)
                 const result = response.json();
+                props.progress(50)
                 result.then((res)=>{
-                    setNews(res.articles);
+                    if (page === 1) {
+                        setNews(res.articles);
+                    } else {
+                        setNews(prevNews => [...prevNews, ...res.articles]);
+                    }
+                    props.progress(70)
                     setPageCount(Math.ceil(res.totalResults/10));
                     SetLoader(false);
+                    props.progress(100)
                 })
             }catch(err){
                 SetLoader(false);
-                console.log(err);
             }
     }
     useEffect(() => {
@@ -28,20 +39,19 @@ function NewsItem(props) {
     },[props.search,page]);
     useEffect(() => {
         console.log(news);
-    },[]);
-    useEffect(() => {
-        console.log(page);
-        console.log(pageCount);
-    },[page]);
+    },[props.search]);
 
   return (
     <>
-        
+        <InfiniteScroll
+            dataLength={news.length}
+            next={fetchMoreData}
+            hasMore={page !== pageCount}
+            loader={<Loader/>}
+        >
+        <div className='row'>
         {      
-            !loader ? (news.length !== 0 ? news.reduce((rows, key, index) => (index % 3 === 0 ? rows.push([key]) : rows[rows.length - 1].push(key)) && rows, [])
-            .map((row, rowIndex) => (
-                <div key={rowIndex} className='row'>
-                    {row.map((e, index) => (
+                news.map((e, index) => (
                         <div key={index} className='col-sm-4 my-3'>
                             <div className="card" style={{width: '18rem'}}>
                             <span className="badge position-absolute top-0 start-100 translate-middle p-2 text-bg-info">{e.source.name ? e.source.name : 'no source'}</span>
@@ -55,14 +65,10 @@ function NewsItem(props) {
                                 </div>
                             </div>
                         </div>
-                    ))}
-                </div>
-            )) : <div className='container' style={{display:'grid',placeItems:'center'}}><h1>No news to show</h1></div> ): <Loader/>
-        }
-        <div className='d-flex justify-content-between my-3 mb-3'>
-           <button disabled={page <= 1} type="button" className="btn btn-dark" onClick={()=>{setPage(prevState => prevState - 1)}}> &laquo; Prev</button>
-           <button disabled={page === pageCount} type="button" className="btn btn-dark" onClick={()=>{setPage(prevState => prevState + 1)}}>Next &raquo;</button>  
+                    ))
+        } 
         </div>
+        </InfiniteScroll>
 
     </>
 
