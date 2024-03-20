@@ -41,6 +41,7 @@ function NewsItem(props) {
     },[props.search,page]);
     useEffect(()=>{
         setNews([])
+        setPage(1)
     },[location.pathname])
     useEffect(() => {
         console.log(news);
