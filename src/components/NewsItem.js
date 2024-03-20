@@ -3,12 +3,14 @@ import { useState, useEffect } from "react";
 import newsImage from '../files/noNews.jpg';
 import Loader from './Loader';
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useLocation } from 'react-router-dom';
 
 function NewsItem(props) {
     const[news,setNews] = useState([]);
-    const[page,setPage] = useState(props.pageSet);
+    const[page,setPage] = useState(1);
     const[pageCount,setPageCount] = useState(0);
     const[loader,SetLoader] = useState(true);
+    const location = useLocation();
     const fetchMoreData = () => {
         setPage(prevState => prevState + 1);
     };
@@ -37,9 +39,13 @@ function NewsItem(props) {
     useEffect(() => {
         fetchNews();
     },[props.search,page]);
+    useEffect(()=>{
+        setNews([])
+    },[location.pathname])
     useEffect(() => {
         console.log(news);
-    },[props.search]);
+        console.log(page);
+    },[props.search,page]);
 
   return (
     <>
