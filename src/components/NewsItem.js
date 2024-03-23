@@ -59,7 +59,7 @@ function NewsItem(props) {
         <div className='row'>
         {      
                 news.map((e, index) => (
-                        <div key={index} className='col-sm-4 my-3'>
+                        <div key={index} className='col-sm-4 my-3' data-aos="fade-left">
                             <div className="card" style={{width: '18rem'}}>
                             <span className="badge position-absolute top-0 start-100 translate-middle p-2 text-bg-info">{e.source.name ? e.source.name : 'no source'}</span>
                                 { e.urlToImage ? <img src={e.urlToImage} width={'287px'} height={'160px'} className="card-img-top" alt=""/>: <img src={newsImage} width={'287px'} height={'160px'} className="card-img-top" alt=""/>}
